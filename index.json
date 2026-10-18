@@ -4,7 +4,7 @@
   "name": "Dashlane",
   "apiVersion": 1,
   "publicKey": "iydYl7Sqc18dyHz5DMnzpG4b/0GnjoMivoidPOPJh6U=",
-  "updatedAt": "2026-10-18T13:09:03.867Z",
+  "updatedAt": "2026-10-18T14:48:59.094Z",
   "plugins": [
     {
       "id": "dashlane-secrets",
@@ -19,10 +19,31 @@
         "Pick which Dashlane collections to import",
         "Logins become Termix password credentials, filed in a folder per collection",
         "Keeps them in sync on a schedule, or when you press Sync now",
-        "Removes credentials whose login left the chosen collections, if you want"
+        "Removes credentials whose login left the chosen collections, if you want",
+        "Or keeps passwords in Dashlane: credentials hold a dashlane:// reference, resolved when a host connects"
       ],
       "docs": "https://github.com/Tabisch/termix-dashlane-secrets/tree/main/docs",
       "versions": [
+        {
+          "version": "1.2.0",
+          "api": "1",
+          "url": "https://github.com/Tabisch/termix-dashlane-secrets/releases/download/v1.2.0/dashlane-secrets-1.2.0.tmxplug",
+          "sha256": "0bbd7f1a0e0dfb6921dc6ba287d12a65f39c2d37a51f11abdcc429d21c0cc4de",
+          "signature": "stPZsIukW/PoCG3D1rYVcF66wGu9XAfGfoWaCqIvYVVXl/lrfdBpa5QfflAuY9iLOtU65tZCjEXSJCdV6GvqCA==",
+          "size": 362347,
+          "capabilities": [
+            "db:own",
+            "secrets:own",
+            "network:outbound",
+            "auth:provide",
+            "network:serve",
+            "ui:surface",
+            "users:impersonate"
+          ],
+          "releaseNotesUrl": "https://github.com/Tabisch/termix-dashlane-secrets/releases/tag/v1.2.0",
+          "notes": "### Added\n\n- Keep passwords in Dashlane: credentials get a `dashlane://<id>/password` reference instead of the password, and the password is read from Dashlane each time a host connects, like the Secret Sources plugin does for 1Password. No password is stored in Termix. On by default, also for accounts connected before, so their next sync swaps the stored passwords for references. Turn it off per user in the tab. The plugin now asks for the `auth:provide` capability to resolve the references\n",
+          "publishedAt": "2026-10-18T14:48:44.000Z"
+        },
         {
           "version": "1.1.0",
           "api": "1",
