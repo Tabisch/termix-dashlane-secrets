@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Termix-SSH/Termix-Registry/main/registry-index-schema.json",
+  "registry": "termix-dashlane-secrets",
+  "name": "Tabisch/termix-dashlane-secrets",
+  "apiVersion": 1,
+  "publicKey": "iydYl7Sqc18dyHz5DMnzpG4b/0GnjoMivoidPOPJh6U=",
+  "updatedAt": "2026-10-18T12:27:27.111Z",
+  "plugins": []
+}
