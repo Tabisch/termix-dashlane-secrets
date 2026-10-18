@@ -138,6 +138,7 @@ export function createRepository(
           login: "",
           collections: "[]",
           removeMissing: 1,
+          passwordReferences: 1,
           ...row,
         });
       }

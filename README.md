@@ -9,7 +9,7 @@ A [Termix](https://github.com/Termix-SSH/Termix) plugin that imports the logins 
 - With [NetBox Sync](https://github.com/Tabisch/termix-netbox-import), tag a device in NetBox with that same `dashlane:<id>` and its host connects with that login
 - Syncs on a schedule an admin sets, or when you press Sync now
 - Updates changed logins, and can delete credentials whose login left the collections
-- Keep passwords in Dashlane: credentials hold a `dashlane://<id>/password` reference instead of the password, and Termix asks Dashlane for it when a host connects, like Secret Sources does for 1Password. Nothing secret is stored in Termix
+- Keep passwords in Dashlane (on by default): credentials hold a `dashlane://<id>/password` reference instead of the password, and Termix asks Dashlane for it when a host connects, like Secret Sources does for 1Password. Nothing secret is stored in Termix
 
 How to set it up and use it: [docs/index.md](docs/index.md).
 

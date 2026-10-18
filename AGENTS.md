@@ -57,7 +57,7 @@ aren't obvious from the code, and anything that has bitten you before.
 - Every credential carries `dashlane` and `dashlane:<id>` (`credentialIdTag`, the normalized Dashlane id,
   upper case, no braces). The id tag is a public contract: NetBox Sync assigns credentials to hosts by it, so
   never change its format.
-- Password references (`connections.passwordReferences`, off by default): the sync writes
+- Password references (`connections.passwordReferences`, on by default, also for rows from before 1.2.0): the sync writes
   `dashlane://<id>/password` (`passwordReference`) instead of the password, and `resolver.ts` answers the
   `dashlane` scheme via `ctx.credentials.registerSecretResolver` (`auth:provide`). Termix calls it at host
   resolution with the credential owner's id; it reads their key with `ctx.asUser`, fetches the vault,

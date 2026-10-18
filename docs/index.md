@@ -41,14 +41,14 @@ A login in several chosen collections goes in the folder of the first one you ti
 
 ## Keep passwords in Dashlane
 
-Turn on Keep passwords in Dashlane, under the collections, and press Save to keep the passwords out of Termix, the way the Secret Sources plugin does for 1Password. The next sync replaces each credential's password with a reference, like `dashlane://8A1B2C3D-0000-4000-8000-1234567890AB/password`. When a host using the credential connects, Termix asks this plugin for the password, and it reads it from your vault right then.
+Keep passwords in Dashlane, under the collections, is on to start with. It keeps the passwords out of Termix, the way the Secret Sources plugin does for 1Password: each credential gets a reference instead of the password, like `dashlane://8A1B2C3D-0000-4000-8000-1234567890AB/password`. When a host using the credential connects, Termix asks this plugin for the password, and it reads it from your vault right then.
 
 - No password is written to Termix's database. Passwords are held in memory for about a minute after a connect, so connecting to several hosts at once asks Dashlane only once.
 - A changed password in Dashlane works on the next connect, without waiting for a sync.
 - Connecting needs Dashlane to be reachable and your device key to work. If it isn't, the connect fails and says why.
 - Only logins in the collections you import resolve. Untick a collection, or disconnect, and its references stop working.
 - A reference resolves with the vault of the credential's owner, also when the credential is shared.
-- Turn it off and the next sync writes the passwords back.
+- Turn it off and press Save to store the passwords in Termix instead: the next sync writes them into the credentials, and connecting no longer needs Dashlane. Accounts connected before version 1.2.0 have it on too, so their next sync swaps the stored passwords for references.
 
 You can also type a reference into a credential or host password yourself, as long as the login is in a collection you import.
 

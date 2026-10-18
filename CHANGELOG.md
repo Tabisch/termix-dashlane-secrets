@@ -4,7 +4,7 @@
 
 ### Added
 
-- Keep passwords in Dashlane: credentials get a `dashlane://<id>/password` reference instead of the password, and the password is read from Dashlane each time a host connects, like the Secret Sources plugin does for 1Password. No password is stored in Termix. Off by default, per user, in the tab. The plugin now asks for the `auth:provide` capability to resolve the references
+- Keep passwords in Dashlane: credentials get a `dashlane://<id>/password` reference instead of the password, and the password is read from Dashlane each time a host connects, like the Secret Sources plugin does for 1Password. No password is stored in Termix. On by default, also for accounts connected before, so their next sync swaps the stored passwords for references. Turn it off per user in the tab. The plugin now asks for the `auth:provide` capability to resolve the references
 
 ## 1.1.0
 

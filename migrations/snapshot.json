@@ -34,7 +34,7 @@
         "passwordReferences": {
           "type": "integer",
           "notNull": true,
-          "defaultValue": 0
+          "defaultValue": 1
         },
         "lastSyncAt": {
           "type": "timestamp"

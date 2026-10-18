@@ -28,7 +28,7 @@ export const connections = defineTable("connections", {
    * Write "dashlane://<id>/password" references into credentials instead of
    * the passwords, resolved from the vault when a host connects.
    */
-  passwordReferences: integer().notNull().default(0),
+  passwordReferences: integer().notNull().default(1),
   lastSyncAt: timestamp(),
   /** "ok" or "error". */
   lastStatus: varchar(16),

@@ -150,7 +150,12 @@ async function request(method: string, path: string, body?: unknown) {
   return { status: response.status, body: await response.json() };
 }
 
-async function connectAndChoose(collections: string[], removeMissing = true) {
+// Most tests check the stored passwords, so they turn references off.
+async function connectAndChoose(
+  collections: string[],
+  removeMissing = true,
+  passwordReferences = false,
+) {
   const connected = await request("POST", "/connect", {
     deviceKey: deviceKeyFor(),
   });
@@ -158,6 +163,7 @@ async function connectAndChoose(collections: string[], removeMissing = true) {
   const config = await request("PUT", "/config", {
     collections,
     removeMissing,
+    passwordReferences,
   });
   expect(config.status).toBe(200);
   return config.body;
@@ -509,13 +515,22 @@ describe("password references", () => {
     servers.requests.filter((r) => r.url.includes("GetLatestContent")).length;
 
   async function connectWithReferences() {
-    await connectAndChoose(["Servers"]);
-    const saved = await request("PUT", "/config", {
-      collections: ["Servers"],
-      passwordReferences: true,
-    });
-    expect(saved.body.passwordReferences).toBe(true);
+    const saved = await connectAndChoose(["Servers"], true, true);
+    expect(saved.passwordReferences).toBe(true);
   }
+
+  it("is on for a new connection", async () => {
+    const connected = await request("POST", "/connect", {
+      deviceKey: deviceKeyFor(),
+    });
+    expect(connected.body.passwordReferences).toBe(true);
+    await request("PUT", "/config", { collections: ["Servers"] });
+    await request("POST", "/sync");
+    expect(servers.credentialsOf("user-1").map((c) => c.password)).toEqual([
+      "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password",
+      "dashlane://22222222-BBBB-4BBB-8BBB-222222222222/password",
+    ]);
+  });
 
   it("stores references instead of passwords", async () => {
     await connectWithReferences();
