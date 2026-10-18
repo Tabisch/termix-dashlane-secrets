@@ -36,6 +36,8 @@
     "missing": "Not in the vault any more",
     "removeMissing": "Delete credentials that leave these collections",
     "removeMissingHint": "Only credentials this plugin imported are ever deleted.",
+    "passwordReferences": "Keep passwords in Dashlane",
+    "passwordReferencesHint": "Credentials get a dashlane:// reference instead of the password, and Termix asks Dashlane for the password each time a host connects. No password is stored in Termix, but connecting needs Dashlane to be reachable. Takes effect on the next sync.",
     "save": "Save",
     "saved": "Collections saved"
   },

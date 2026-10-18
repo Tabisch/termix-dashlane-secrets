@@ -1,7 +1,7 @@
 {
   "id": "dashlane-secrets",
   "name": "Dashlane",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Import and sync logins from Dashlane collections into Termix credentials.",
   "author": {
     "name": "Tabisch",
@@ -17,7 +17,8 @@
     "Pick which Dashlane collections to import",
     "Logins become Termix password credentials, filed in a folder per collection",
     "Keeps them in sync on a schedule, or when you press Sync now",
-    "Removes credentials whose login left the chosen collections, if you want"
+    "Removes credentials whose login left the chosen collections, if you want",
+    "Or keeps passwords in Dashlane: credentials hold a dashlane:// reference, resolved when a host connects"
   ],
   "env": [
     {
@@ -34,6 +35,7 @@
     "db:own",
     "secrets:own",
     "network:outbound",
+    "auth:provide",
     "network:serve",
     "ui:surface",
     "users:impersonate"

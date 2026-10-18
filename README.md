@@ -5,8 +5,11 @@ A [Termix](https://github.com/Termix-SSH/Termix) plugin that imports the logins 
 - Connect with a Dashlane service device key (`dcli devices register`), so it works with no one signed in
 - Pick which collections to import
 - Each login becomes a password credential, filed in a folder named after its collection and tagged `dashlane`
+- Each credential also gets a `dashlane:<Dashlane id>` tag that never changes, not on edits, moves or a reimport. The tab shows it under each credential
+- With [NetBox Sync](https://github.com/Tabisch/termix-netbox-import), tag a device in NetBox with that same `dashlane:<id>` and its host connects with that login
 - Syncs on a schedule an admin sets, or when you press Sync now
 - Updates changed logins, and can delete credentials whose login left the collections
+- Keep passwords in Dashlane (on by default): credentials hold a `dashlane://<id>/password` reference instead of the password, and Termix asks Dashlane for it when a host connects, like Secret Sources does for 1Password. Nothing secret is stored in Termix
 
 How to set it up and use it: [docs/index.md](docs/index.md).
 
@@ -42,12 +45,14 @@ The Registry workflow signs any release that has no `.sig` yet and attaches the 
 2. A sync calls Dashlane's `sync/GetLatestContent` API, signed with the device keys, and gets every transaction in the personal vault.
 3. Each transaction is decrypted the way the [Dashlane CLI](https://github.com/Dashlane/dashlane-cli) does it: Argon2d or PBKDF2 key derivation, AES-256-CBC with HMAC-SHA256, then raw deflate. That gives the login (`AUTHENTIFIANT`) and collection items as XML.
 4. Logins in the chosen collections are written to Termix's `/credentials` API as the user, with a short-lived session from `ctx.auth.issueUserToken`. The plugin keeps a table of which Dashlane item became which credential and a hash of what it wrote, so unchanged logins are not written again.
+5. With Keep passwords in Dashlane on, the password written is `dashlane://<id>/password`. The plugin registers the `dashlane` scheme with `ctx.credentials.registerSecretResolver`, so when a host connects Termix hands it the reference and the credential's owner. It reads that user's vault (cached in memory for 30 seconds) and returns the password.
 
 Capabilities it asks for:
 
 | Capability          | Why                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------- |
 | `users:impersonate` | A short-lived Termix session per sync, to create, update and delete the user's credentials as that user. |
+| `auth:provide`      | Resolve `dashlane://` references in credentials when a host connects.                                    |
 | `network:outbound`  | Reach `api.dashlane.com`, and Termix's own API on `127.0.0.1`.                                           |
 | `secrets:own`       | Store each user's device key encrypted.                                                                  |
 | `db:own`            | Remember which credential each Dashlane login became.                                                    |

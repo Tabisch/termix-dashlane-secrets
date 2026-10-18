@@ -31,6 +31,7 @@ export type Status =
       collections: string[];
       availableCollections: CollectionInfo[];
       removeMissing: boolean;
+      passwordReferences: boolean;
       lastSyncAt: string | null;
       lastStatus: "ok" | "error" | null;
       lastError: string | null;
@@ -45,8 +46,18 @@ export function createDashlaneApi(api: Api) {
     status: async () => (await api.get<Status>("/status")).data,
     connect: async (deviceKey: string) =>
       (await api.post<Status>("/connect", { deviceKey })).data,
-    saveConfig: async (collections: string[], removeMissing: boolean) =>
-      (await api.put<Status>("/config", { collections, removeMissing })).data,
+    saveConfig: async (
+      collections: string[],
+      removeMissing: boolean,
+      passwordReferences: boolean,
+    ) =>
+      (
+        await api.put<Status>("/config", {
+          collections,
+          removeMissing,
+          passwordReferences,
+        })
+      ).data,
     refreshCollections: async () =>
       (await api.post<Status>("/collections/refresh")).data,
     sync: async () => (await api.post<Status>("/sync")).data,

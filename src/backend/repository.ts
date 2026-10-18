@@ -25,6 +25,8 @@ export interface Connection {
   collections: string[];
   availableCollections: CollectionInfo[];
   removeMissing: boolean;
+  /** Credentials hold dashlane:// references, not passwords. */
+  passwordReferences: boolean;
   lastSyncAt: string | null;
   lastStatus: "ok" | "error" | null;
   lastError: string | null;
@@ -63,6 +65,7 @@ function toConnection(row: Record<string, unknown>): Connection {
       [],
     ),
     removeMissing: Boolean(Number(row.removeMissing)),
+    passwordReferences: Boolean(Number(row.passwordReferences)),
     lastSyncAt: (row.lastSyncAt as string | null) ?? null,
     lastStatus: (row.lastStatus as Connection["lastStatus"]) ?? null,
     lastError: (row.lastError as string | null) ?? null,
@@ -109,6 +112,9 @@ export function createRepository(
       if (values.removeMissing !== undefined) {
         row.removeMissing = values.removeMissing ? 1 : 0;
       }
+      if (values.passwordReferences !== undefined) {
+        row.passwordReferences = values.passwordReferences ? 1 : 0;
+      }
       if (values.lastSyncAt !== undefined) row.lastSyncAt = values.lastSyncAt;
       if (values.lastStatus !== undefined) row.lastStatus = values.lastStatus;
       if (values.lastError !== undefined) row.lastError = values.lastError;
@@ -132,6 +138,7 @@ export function createRepository(
           login: "",
           collections: "[]",
           removeMissing: 1,
+          passwordReferences: 1,
           ...row,
         });
       }

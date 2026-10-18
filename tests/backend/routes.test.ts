@@ -150,7 +150,12 @@ async function request(method: string, path: string, body?: unknown) {
   return { status: response.status, body: await response.json() };
 }
 
-async function connectAndChoose(collections: string[], removeMissing = true) {
+// Most tests check the stored passwords, so they turn references off.
+async function connectAndChoose(
+  collections: string[],
+  removeMissing = true,
+  passwordReferences = false,
+) {
   const connected = await request("POST", "/connect", {
     deviceKey: deviceKeyFor(),
   });
@@ -158,6 +163,7 @@ async function connectAndChoose(collections: string[], removeMissing = true) {
   const config = await request("PUT", "/config", {
     collections,
     removeMissing,
+    passwordReferences,
   });
   expect(config.status).toBe(200);
   return config.body;
@@ -497,6 +503,119 @@ describe("disconnecting", () => {
     await request("POST", "/sync");
     await request("DELETE", "/connect?removeCredentials=true");
     expect(servers.credentialsOf("user-1")).toEqual([]);
+  });
+});
+
+describe("password references", () => {
+  beforeEach(() => start());
+
+  const resolve = (userId: string, reference: string) =>
+    mock.auth.secretResolvers.get("dashlane")!(userId, reference);
+  const vaultFetches = () =>
+    servers.requests.filter((r) => r.url.includes("GetLatestContent")).length;
+
+  async function connectWithReferences() {
+    const saved = await connectAndChoose(["Servers"], true, true);
+    expect(saved.passwordReferences).toBe(true);
+  }
+
+  it("is on for a new connection", async () => {
+    const connected = await request("POST", "/connect", {
+      deviceKey: deviceKeyFor(),
+    });
+    expect(connected.body.passwordReferences).toBe(true);
+    await request("PUT", "/config", { collections: ["Servers"] });
+    await request("POST", "/sync");
+    expect(servers.credentialsOf("user-1").map((c) => c.password)).toEqual([
+      "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password",
+      "dashlane://22222222-BBBB-4BBB-8BBB-222222222222/password",
+    ]);
+  });
+
+  it("stores references instead of passwords", async () => {
+    await connectWithReferences();
+    const res = await request("POST", "/sync");
+    expect(res.body.lastSummary).toMatchObject({ created: 2 });
+    expect(
+      servers.credentialsOf("user-1").map((c) => [c.name, c.password]),
+    ).toEqual([
+      ["web-1", "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password"],
+      ["db-1", "dashlane://22222222-BBBB-4BBB-8BBB-222222222222/password"],
+    ]);
+    expect(JSON.stringify(servers.credentialsOf("user-1"))).not.toContain(
+      "pw-",
+    );
+  });
+
+  it("resolves a reference from the vault when a host connects", async () => {
+    await connectWithReferences();
+    await request("POST", "/sync");
+    const before = vaultFetches();
+    expect(
+      await resolve(
+        "user-1",
+        "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password",
+      ),
+    ).toBe("pw-web");
+    // Braces and any case, and the vault is fetched once for both.
+    expect(
+      await resolve(
+        "user-1",
+        "dashlane://{22222222-bbbb-4bbb-8bbb-222222222222}/password",
+      ),
+    ).toBe("pw-db");
+    expect(vaultFetches() - before).toBe(1);
+  });
+
+  it("only resolves logins in the chosen collections, for a connected user", async () => {
+    await connectWithReferences();
+    await expect(
+      resolve(
+        "user-1",
+        "dashlane://33333333-CCCC-4CCC-8CCC-333333333333/password",
+      ),
+    ).rejects.toThrow(/not in a collection you import/);
+    await expect(
+      resolve("user-1", "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/note"),
+    ).rejects.toThrow(/Not a Dashlane reference/);
+    await expect(
+      resolve(
+        "user-2",
+        "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password",
+      ),
+    ).rejects.toThrow(/not connected/);
+
+    await request("DELETE", "/connect");
+    await expect(
+      resolve(
+        "user-1",
+        "dashlane://11111111-AAAA-4AAA-8AAA-111111111111/password",
+      ),
+    ).rejects.toThrow(/not connected/);
+  });
+
+  it("writes the passwords back when turned off", async () => {
+    await connectWithReferences();
+    await request("POST", "/sync");
+    await request("PUT", "/config", {
+      collections: ["Servers"],
+      passwordReferences: false,
+    });
+    const res = await request("POST", "/sync");
+    expect(res.body.lastSummary).toMatchObject({ updated: 2, created: 0 });
+    expect(servers.credentialsOf("user-1").map((c) => c.password)).toEqual([
+      "pw-web",
+      "pw-db",
+    ]);
+  });
+
+  it("refuses a value that is not true or false", async () => {
+    await connectAndChoose(["Servers"]);
+    const res = await request("PUT", "/config", {
+      collections: ["Servers"],
+      passwordReferences: "yes",
+    });
+    expect(res.status).toBe(400);
   });
 });
 
