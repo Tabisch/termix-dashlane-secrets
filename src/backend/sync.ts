@@ -11,6 +11,7 @@ import {
 import {
   coreCredentialsFor,
   type CoreCredentials,
+  type CoreSession,
   type CredentialInput,
 } from "./core-credentials.js";
 import type { CollectionInfo, Repository, SyncSummary } from "./repository.js";
@@ -140,8 +141,8 @@ export function selectCredentials(
 export function createSyncer(deps: SyncDeps) {
   const { ctx, repo } = deps;
   const fetchVault = (key: DeviceKey) => loadVault(ctx, key);
-  const coreFor = (userId: string): Promise<CoreCredentials> =>
-    coreCredentialsFor(ctx, userId);
+  const coreFor = (session: CoreSession): Promise<CoreCredentials> =>
+    coreCredentialsFor(ctx, session);
   const running = new Set<string>();
 
   /** Reads the acting user's device key. Must run as that user. */
@@ -153,7 +154,10 @@ export function createSyncer(deps: SyncDeps) {
     return parseDeviceKey(raw);
   }
 
-  async function syncOnce(userId: string): Promise<SyncSummary> {
+  async function syncOnce(
+    userId: string,
+    session: CoreSession,
+  ): Promise<SyncSummary> {
     const connection = await repo.getConnection(userId);
     if (!connection) {
       throw new SyncError("Dashlane is not connected", "not_connected");
@@ -180,7 +184,7 @@ export function createSyncer(deps: SyncDeps) {
           imported.get(id)?.contentHash !==
             hashInput(toCredentialInput(credential, collection)),
       );
-    const core = needsCore ? await coreFor(userId) : null;
+    const core = needsCore ? await coreFor(session) : null;
 
     try {
       for (const [id, { credential, collection }] of selected) {
@@ -257,14 +261,21 @@ export function createSyncer(deps: SyncDeps) {
     deviceKey,
     coreFor,
 
-    /** Syncs one user. Must run as that user (a route, or inside ctx.asUser). */
-    async run(userId: string): Promise<SyncSummary> {
+    /**
+     * Syncs one user. Must run as that user (a route, or inside ctx.asUser).
+     * `session` is how Termix is reached as them: the request's own token, or
+     * by default a token minted for background work.
+     */
+    async run(
+      userId: string,
+      session: CoreSession = { userId },
+    ): Promise<SyncSummary> {
       if (running.has(userId)) {
         throw new SyncError("A sync is already running", "busy");
       }
       running.add(userId);
       try {
-        return await syncOnce(userId);
+        return await syncOnce(userId, session);
       } catch (error) {
         if (!(error instanceof SyncError && error.code === "not_connected")) {
           await repo

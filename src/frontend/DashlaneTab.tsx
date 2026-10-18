@@ -316,9 +316,11 @@ function ConnectedView({
             </p>
           )}
           <p className="text-muted-foreground">
-            {status.syncIntervalMinutes > 0
-              ? t("sync.interval", { count: status.syncIntervalMinutes })
-              : t("sync.manualOnly")}
+            {!status.scheduledSyncSupported
+              ? t("sync.needsNewerTermix")
+              : status.syncIntervalMinutes > 0
+                ? t("sync.interval", { count: status.syncIntervalMinutes })
+                : t("sync.manualOnly")}
           </p>
         </div>
       </SectionCard>

@@ -2,6 +2,11 @@ import type { Request, Response, Router } from "express";
 import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
 import { DashlaneApiError } from "./dashlane/api.js";
 import { DeviceKeyFormatError, parseDeviceKey } from "./dashlane/device-key.js";
+import {
+  canIssueUserTokens,
+  requestToken,
+  type CoreSession,
+} from "./core-credentials.js";
 import type { Repository } from "./repository.js";
 import { DEVICE_KEY_SECRET, SyncError, type Syncer } from "./sync.js";
 
@@ -40,17 +45,28 @@ export function registerRoutes(
 
   const actor = () => ctx.currentActor() as string;
 
+  /** Reaches Termix with the caller's own session, so it works on API 1.2. */
+  const sessionOf = (req: Request): CoreSession => {
+    const token = requestToken(req as never);
+    return token ? { token } : { userId: actor() };
+  };
+
   async function status(userId: string) {
     const connection = await repo.getConnection(userId);
     const interval =
       (await ctx.settings.get<number>("syncIntervalMinutes")) ?? 60;
     if (!connection) {
-      return { connected: false, syncIntervalMinutes: interval };
+      return {
+        connected: false,
+        syncIntervalMinutes: interval,
+        scheduledSyncSupported: canIssueUserTokens(ctx),
+      };
     }
     const items = await repo.listItems(userId);
     return {
       connected: true,
       syncIntervalMinutes: interval,
+      scheduledSyncSupported: canIssueUserTokens(ctx),
       login: connection.login,
       collections: connection.collections,
       availableCollections: connection.availableCollections,
@@ -254,10 +270,10 @@ export function registerRoutes(
    *       502:
    *         description: Dashlane or Termix refused part of the sync. lastError has the reason
    */
-  router.post("/sync", async (_req: Request, res: Response) => {
+  router.post("/sync", async (req: Request, res: Response) => {
     const userId = actor();
     try {
-      await syncer.run(userId);
+      await syncer.run(userId, sessionOf(req));
       res.json(await status(userId));
     } catch (error) {
       return sendFailure(res, error);
@@ -289,7 +305,7 @@ export function registerRoutes(
       const items = await repo.listItems(userId);
       if (items.length) {
         try {
-          const core = await syncer.coreFor(userId);
+          const core = await syncer.coreFor(sessionOf(req));
           for (const item of items) await core.remove(item.credentialId);
         } catch (error) {
           return sendFailure(res, error);

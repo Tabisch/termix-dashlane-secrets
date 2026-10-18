@@ -21,6 +21,7 @@ afterEach(async () => {
 const connected = {
   connected: true,
   syncIntervalMinutes: 60,
+  scheduledSyncSupported: true,
   login: "someone@example.com",
   collections: ["Servers"],
   availableCollections: [
@@ -56,7 +57,11 @@ describe(`${manifest.id} activate`, () => {
       locales,
       api: {
         get: vi.fn(async () => ({
-          data: { connected: false, syncIntervalMinutes: 60 },
+          data: {
+            connected: false,
+            syncIntervalMinutes: 60,
+            scheduledSyncSupported: true,
+          },
         })),
         post,
       } as never,
@@ -84,7 +89,11 @@ describe(`${manifest.id} activate`, () => {
       locales,
       api: {
         get: vi.fn(async () => ({
-          data: { connected: false, syncIntervalMinutes: 60 },
+          data: {
+            connected: false,
+            syncIntervalMinutes: 60,
+            scheduledSyncSupported: true,
+          },
         })),
         post: vi.fn(async () => {
           throw { response: { data: { error: "Device deactivated" } } };
@@ -163,5 +172,19 @@ describe(`${manifest.id} activate`, () => {
     rendered.renderTab("dashlane", { isVisible: true });
     expect(await screen.findByText("Old")).toBeTruthy();
     expect(screen.getByText(locales.collections.missing)).toBeTruthy();
+  });
+
+  it("says automatic sync needs a newer Termix on API 1.2 servers", async () => {
+    rendered = await renderWithApp(plugin, {
+      manifest,
+      locales,
+      api: {
+        get: vi.fn(async () => ({
+          data: { ...connected, scheduledSyncSupported: false },
+        })),
+      } as never,
+    });
+    rendered.renderTab("dashlane", { isVisible: true });
+    expect(await screen.findByText(locales.sync.needsNewerTermix)).toBeTruthy();
   });
 });

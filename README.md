@@ -41,18 +41,18 @@ The Registry workflow signs any release that has no `.sig` yet and attaches the 
 1. The service device key holds your Dashlane login, a device key pair and your master password. It is stored with `ctx.secrets`, encrypted with the Termix installation key, so scheduled syncs can read it.
 2. A sync calls Dashlane's `sync/GetLatestContent` API, signed with the device keys, and gets every transaction in the personal vault.
 3. Each transaction is decrypted the way the [Dashlane CLI](https://github.com/Dashlane/dashlane-cli) does it: Argon2d or PBKDF2 key derivation, AES-256-CBC with HMAC-SHA256, then raw deflate. That gives the login (`AUTHENTIFIANT`) and collection items as XML.
-4. Logins in the chosen collections are written to Termix's `/credentials` API as the user, with a short-lived session from `ctx.auth.issueUserToken`. The plugin keeps a table of which Dashlane item became which credential and a hash of what it wrote, so unchanged logins are not written again.
+4. Logins in the chosen collections are written to Termix's `/credentials` API as the user: with their own session for Sync now, and with a short-lived session from `ctx.auth.issueUserToken` for scheduled syncs. That call needs plugin API 1.3 (Termix 26.10.2), so on older servers only Sync now works. The plugin keeps a table of which Dashlane item became which credential and a hash of what it wrote, so unchanged logins are not written again.
 
 Capabilities it asks for:
 
-| Capability          | Why                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------- |
-| `users:impersonate` | A short-lived Termix session per sync, to create, update and delete the user's credentials as that user. |
-| `network:outbound`  | Reach `api.dashlane.com`, and Termix's own API on `127.0.0.1`.                                           |
-| `secrets:own`       | Store each user's device key encrypted.                                                                  |
-| `db:own`            | Remember which credential each Dashlane login became.                                                    |
-| `network:serve`     | The tab's API routes.                                                                                    |
-| `ui:surface`        | The Dashlane tab.                                                                                        |
+| Capability          | Why                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `users:impersonate` | For scheduled syncs, a short-lived Termix session to create, update and delete the user's credentials as that user. |
+| `network:outbound`  | Reach `api.dashlane.com`, and Termix's own API on `127.0.0.1`.                                                      |
+| `secrets:own`       | Store each user's device key encrypted.                                                                             |
+| `db:own`            | Remember which credential each Dashlane login became.                                                               |
+| `network:serve`     | The tab's API routes.                                                                                               |
+| `ui:surface`        | The Dashlane tab.                                                                                                   |
 
 ### Things to know
 

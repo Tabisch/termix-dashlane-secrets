@@ -21,10 +21,16 @@ export interface ImportedCredential {
 }
 
 export type Status =
-  | { connected: false; syncIntervalMinutes: number }
+  | {
+      connected: false;
+      syncIntervalMinutes: number;
+      scheduledSyncSupported: boolean;
+    }
   | {
       connected: true;
       syncIntervalMinutes: number;
+      /** False on servers before plugin API 1.3, which can only Sync now. */
+      scheduledSyncSupported: boolean;
       login: string;
       collections: string[];
       availableCollections: CollectionInfo[];

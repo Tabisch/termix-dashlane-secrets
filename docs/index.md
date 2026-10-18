@@ -39,7 +39,7 @@ A login in several chosen collections goes in the folder of the first one you ti
 
 ## Keeping in sync
 
-Termix syncs every connected account on a schedule, every 60 minutes by default. Admins set the interval in Settings, under Dashlane. 0 turns automatic sync off, and people press Sync now themselves.
+Termix syncs every connected account on a schedule, every 60 minutes by default. Automatic sync needs Termix 26.10.2 or newer; on older servers press Sync now, and the tab says so. Admins set the interval in Settings, under Dashlane. 0 turns automatic sync off, and people press Sync now themselves.
 
 On each sync:
 

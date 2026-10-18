@@ -3,8 +3,10 @@ import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
 /**
  * Termix's own credentials API, called as one user. The SDK can only save SSH
  * keys (ctx.credentials.createSshKey), and a Dashlane login is a username and
- * password, so this goes through core's /credentials routes with a short-lived
- * session from ctx.auth.issueUserToken. That user's permissions apply
+ * password, so this goes through core's /credentials routes as the user. The
+ * session is the one their request came with, or for background work a
+ * short-lived one from ctx.auth.issueUserToken, which only servers with
+ * plugin API 1.3 (Termix 26.10.2) have. That user's permissions apply
  * unchanged: credentials.create, credentials.edit and credentials.delete.
  */
 
@@ -41,14 +43,42 @@ export interface CoreCredentials {
   remove: (id: number) => Promise<boolean>;
 }
 
+/** The caller's session token, as core's auth middleware reads it. */
+export function requestToken(req: {
+  headers: Record<string, unknown>;
+  cookies?: Record<string, unknown>;
+}): string | null {
+  const cookie = req.cookies?.jwt;
+  if (typeof cookie === "string" && cookie) return cookie;
+  const header = req.headers.authorization;
+  if (typeof header !== "string" || !header.startsWith("Bearer ")) return null;
+  return header.slice(7).trim() || null;
+}
+
+/** Whether this server can mint sessions for background work (plugin API 1.3). */
+export function canIssueUserTokens(ctx: PluginContext): boolean {
+  return typeof ctx.auth?.issueUserToken === "function";
+}
+
+/**
+ * How to reach core as a user: the request's own session when there is one,
+ * else a token minted for background work.
+ */
+export type CoreSession = { token: string } | { userId: string };
+
 export async function coreCredentialsFor(
   ctx: PluginContext,
-  userId: string,
+  session: CoreSession,
 ): Promise<CoreCredentials> {
-  const { token } = await ctx.auth.issueUserToken(userId, {
-    purpose: "Dashlane sync",
-    ttlSeconds: 600,
-  });
+  const token =
+    "token" in session
+      ? session.token
+      : (
+          await ctx.auth.issueUserToken(session.userId, {
+            purpose: "Dashlane sync",
+            ttlSeconds: 600,
+          })
+        ).token;
   const base = coreUrl();
   const host = new URL(base).hostname;
 

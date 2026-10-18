@@ -115,6 +115,7 @@ async function start(permissions: string[] = ["dashlane-secrets.use"]) {
     fetch: servers.fetch,
   });
   servers.resolveTokens((token) => {
+    if (token.startsWith("session-")) return token.slice("session-".length);
     const index = Number(token.replace("fake-token-", "")) - 1;
     return mock.auth.userTokens[index]?.userId;
   });
@@ -122,6 +123,17 @@ async function start(permissions: string[] = ["dashlane-secrets.use"]) {
 
   const app = express();
   app.use(express.json());
+  // Core parses cookies before plugin routes run.
+  app.use((req, _res, next) => {
+    (req as unknown as { cookies: Record<string, string> }).cookies =
+      Object.fromEntries(
+        (req.headers.cookie ?? "")
+          .split(";")
+          .map((part) => part.trim().split("="))
+          .filter(([key]) => key),
+      );
+    next();
+  });
   app.use((_req, _res, next) => {
     mock.setActor(actor);
     next();
@@ -141,10 +153,18 @@ afterEach(async () => {
   db.close();
 });
 
-async function request(method: string, path: string, body?: unknown) {
+async function request(
+  method: string,
+  path: string,
+  body?: unknown,
+  headers: Record<string, string> = {},
+) {
   const response = await fetch(`http://127.0.0.1:${port}${path}`, {
     method,
-    headers: body ? { "content-type": "application/json" } : {},
+    headers: {
+      ...(body ? { "content-type": "application/json" } : {}),
+      ...headers,
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   return { status: response.status, body: await response.json() };
@@ -170,6 +190,7 @@ describe("connecting", () => {
     expect((await request("GET", "/status")).body).toEqual({
       connected: false,
       syncIntervalMinutes: 60,
+      scheduledSyncSupported: true,
     });
   });
 
@@ -553,6 +574,59 @@ describe("lifecycle", () => {
     for (const dispose of mock.disposals) await dispose();
     await activate(mock.ctx);
     expect((await request("GET", "/status")).body.login).toBe(LOGIN);
+  });
+});
+
+describe("servers on plugin API 1.2", () => {
+  beforeEach(async () => {
+    await start();
+    // What a Termix before 26.10.2 hands the plugin: no issueUserToken.
+    (mock.ctx.auth as { issueUserToken?: unknown }).issueUserToken = undefined;
+  });
+
+  const session = { authorization: "Bearer session-user-1" };
+
+  it("syncs with the caller's own session", async () => {
+    await connectAndChoose(["Servers"]);
+    const res = await request("POST", "/sync", undefined, session);
+    expect(res.status).toBe(200);
+    expect(res.body.lastSummary.created).toBe(2);
+    expect(res.body.scheduledSyncSupported).toBe(false);
+    const coreCalls = servers.requests.filter((r) =>
+      r.url.includes("127.0.0.1"),
+    );
+    expect(coreCalls.length).toBeGreaterThan(0);
+    for (const call of coreCalls) {
+      expect(call.init?.headers?.authorization).toBe("Bearer session-user-1");
+    }
+    expect(mock.auth.userTokens).toEqual([]);
+  });
+
+  it("also reads the session from the jwt cookie", async () => {
+    await connectAndChoose(["Servers"]);
+    const res = await request("POST", "/sync", undefined, {
+      cookie: "jwt=session-user-1",
+    });
+    expect(res.body.lastSummary.created).toBe(2);
+  });
+
+  it("deletes imported credentials on disconnect with the caller's session", async () => {
+    await connectAndChoose(["Servers"]);
+    await request("POST", "/sync", undefined, session);
+    await request(
+      "DELETE",
+      "/connect?removeCredentials=true",
+      undefined,
+      session,
+    );
+    expect(servers.credentialsOf("user-1")).toEqual([]);
+  });
+
+  it("leaves the scheduled sync off", async () => {
+    await connectAndChoose(["Servers"]);
+    await mock.runScheduled();
+    expect(servers.credentialsOf("user-1")).toEqual([]);
+    expect((await request("GET", "/status")).body.lastSyncAt).toBeNull();
   });
 });
 

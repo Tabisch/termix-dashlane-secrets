@@ -1,4 +1,5 @@
 import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
+import { canIssueUserTokens } from "./core-credentials.js";
 import type { Repository } from "./repository.js";
 import type { Syncer } from "./sync.js";
 
@@ -9,6 +10,10 @@ const TICK_MS = 60_000;
  * interval applies without a restart. Each sync runs as its own user.
  * Failures are recorded on the connection and never thrown, so one broken
  * account can't spend the plugin's error budget.
+ *
+ * A background sync has no request to borrow a session from, so it needs
+ * ctx.auth.issueUserToken (plugin API 1.3, Termix 26.10.2). On older servers
+ * the tick does nothing and people use Sync now.
  */
 export function startScheduledSync(
   ctx: PluginContext,
@@ -36,6 +41,7 @@ export async function runDueSyncs(
     (await ctx.settings.get<number>("syncIntervalMinutes")) ?? 60,
   );
   if (!Number.isFinite(minutes) || minutes <= 0) return 0;
+  if (!canIssueUserTokens(ctx)) return 0;
 
   let ran = 0;
   for (const connection of await repo.listConnections()) {

@@ -48,6 +48,7 @@
     "interval_one": "Syncs every minute.",
     "interval_other": "Syncs every {{count}} minutes.",
     "manualOnly": "Automatic sync is off. An admin can turn it on in Settings.",
+    "needsNewerTermix": "Automatic sync needs Termix 26.10.2 or newer. Until then, press Sync now to sync.",
     "ok": "Synced",
     "failed": "The last sync failed",
     "summary": "{{created}} added, {{updated}} updated, {{unchanged}} unchanged, {{removed}} removed, {{skipped}} skipped",

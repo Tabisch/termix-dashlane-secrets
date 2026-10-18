@@ -46,9 +46,11 @@ aren't obvious from the code, and anything that has bitten you before.
   `api.ts` signs and sends `sync/GetLatestContent` with `@dashlane/apiconnect-worker` over `ctx.fetch`,
   `crypto.ts` decrypts Dashlane's `$1$...` payloads (ported from the Dashlane CLI, Apache-2.0),
   `vault.ts` turns transactions into logins and collections.
-- `core-credentials.ts`: Termix's `/credentials` API on `127.0.0.1:30001` with a token from
-  `ctx.auth.issueUserToken`. The SDK can only create SSH key credentials, so this is the only way to write
-  password credentials.
+- `core-credentials.ts`: Termix's `/credentials` API on `127.0.0.1:30001`. The SDK can only create SSH key
+  credentials, so this is the only way to write password credentials. Routes pass the caller's own session
+  (`jwt` cookie or bearer); background work needs `ctx.auth.issueUserToken`, which only exists on plugin API
+  1.3 (Termix 26.10.2). `engine.api` stays `^1.2` so 26.10.0/26.10.1 can install it: feature-detect with
+  `canIssueUserTokens(ctx)`, never require 1.3. The scheduled sync is a no-op without it.
 - `sync.ts`: picks logins by collection name (case-insensitive), creates, updates (recreates on 404) and
   removes credentials, and records a hash per item so unchanged logins cost nothing. Nothing is removed on a
   run where some transaction failed to decrypt.
