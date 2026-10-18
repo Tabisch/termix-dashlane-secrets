@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+### Fixed
+
+- The plugin stopped on start with "cannot register secret scheme "dashlane": it is not listed in contributes.auth.secretSchemes". The manifest now declares the `dashlane` scheme
+
 ## 1.2.0
 
 ### Added

@@ -519,6 +519,13 @@ describe("password references", () => {
     expect(saved.passwordReferences).toBe(true);
   }
 
+  it("declares the scheme it registers, which Termix requires", () => {
+    expect(manifest.contributes?.auth?.secretSchemes).toEqual(["dashlane"]);
+    expect([...mock.auth.secretResolvers.keys()]).toEqual(
+      manifest.contributes?.auth?.secretSchemes,
+    );
+  });
+
   it("is on for a new connection", async () => {
     const connected = await request("POST", "/connect", {
       deviceKey: deviceKeyFor(),

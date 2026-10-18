@@ -59,7 +59,9 @@ aren't obvious from the code, and anything that has bitten you before.
   never change its format.
 - Password references (`connections.passwordReferences`, on by default, also for rows from before 1.2.0): the sync writes
   `dashlane://<id>/password` (`passwordReference`) instead of the password, and `resolver.ts` answers the
-  `dashlane` scheme via `ctx.credentials.registerSecretResolver` (`auth:provide`). Termix calls it at host
+  `dashlane` scheme via `ctx.credentials.registerSecretResolver` (`auth:provide`, and the scheme must be in
+  the manifest's `contributes.auth.secretSchemes`, or Termix stops the plugin on activate; the SDK mock
+  doesn't check this, a test does). Termix calls it at host
   resolution with the credential owner's id; it reads their key with `ctx.asUser`, fetches the vault,
   and only answers for logins in their chosen collections. Vaults are cached in memory for 30s per user
   (Termix adds its own 60s cache) and `forget` drops them on connect, config change and disconnect.

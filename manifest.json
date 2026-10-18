@@ -1,7 +1,7 @@
 {
   "id": "dashlane-secrets",
   "name": "Dashlane",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Import and sync logins from Dashlane collections into Termix credentials.",
   "author": {
     "name": "Tabisch",
@@ -41,6 +41,9 @@
     "users:impersonate"
   ],
   "contributes": {
+    "auth": {
+      "secretSchemes": ["dashlane"]
+    },
     "tabs": [
       {
         "id": "dashlane",
