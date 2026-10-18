@@ -21,6 +21,16 @@ export const DEVICE_KEY_SECRET = "deviceKey";
 /** Tag on every credential this plugin makes, so people can filter by it. */
 export const CREDENTIAL_TAG = "dashlane";
 
+/**
+ * The tag that names one Dashlane login: "dashlane:" and its Dashlane id.
+ * The id never changes, so the tag stays the same across syncs, edits and a
+ * credential being made again, and other plugins (NetBox Sync) can find the
+ * credential by it.
+ */
+export function credentialIdTag(dashlaneId: string): string {
+  return `${CREDENTIAL_TAG}:${dashlaneId}`;
+}
+
 export class SyncError extends Error {
   constructor(
     message: string,
@@ -96,7 +106,7 @@ export function toCredentialInput(
       "Dashlane login",
     description: credential.url,
     folder: collection,
-    tags: [CREDENTIAL_TAG],
+    tags: [CREDENTIAL_TAG, credentialIdTag(credential.id)],
     username,
     password: credential.password,
   };

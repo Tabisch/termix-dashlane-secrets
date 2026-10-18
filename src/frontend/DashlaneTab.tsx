@@ -333,7 +333,11 @@ function ConnectedView({
               key={item.credentialId}
               title={item.title ?? String(item.credentialId)}
               meta={item.collection}
-            />
+            >
+              <code className="text-xs text-muted-foreground select-all">
+                {item.tag}
+              </code>
+            </ListRow>
           ))}
         </PanelList>
       </SectionCard>

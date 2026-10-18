@@ -3,7 +3,12 @@ import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
 import { DashlaneApiError } from "./dashlane/api.js";
 import { DeviceKeyFormatError, parseDeviceKey } from "./dashlane/device-key.js";
 import type { Repository } from "./repository.js";
-import { DEVICE_KEY_SECRET, SyncError, type Syncer } from "./sync.js";
+import {
+  credentialIdTag,
+  DEVICE_KEY_SECRET,
+  SyncError,
+  type Syncer,
+} from "./sync.js";
 
 const MAX_COLLECTIONS = 200;
 const MAX_NAME_LENGTH = 255;
@@ -60,10 +65,11 @@ export function registerRoutes(
       lastError: connection.lastError,
       lastSummary: connection.lastSummary,
       items: items
-        .map(({ title, collection, credentialId, updatedAt }) => ({
+        .map(({ title, collection, credentialId, dashlaneId, updatedAt }) => ({
           title,
           collection,
           credentialId,
+          tag: credentialIdTag(dashlaneId),
           updatedAt,
         }))
         .sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "")),
@@ -79,7 +85,7 @@ export function registerRoutes(
    *       - Dashlane
    *     responses:
    *       200:
-   *         description: Whether Dashlane is connected, and if so what is synced and how the last sync went
+   *         description: Whether Dashlane is connected, and if so what is synced and how the last sync went. Each imported credential lists its stable dashlane:<id> tag
    */
   router.get("/status", async (_req: Request, res: Response) => {
     res.json(await status(actor()));
