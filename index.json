@@ -1,9 +1,48 @@
 {
   "$schema": "https://raw.githubusercontent.com/Termix-SSH/Termix-Registry/main/registry-index-schema.json",
-  "registry": "termix-dashlane-secrets",
-  "name": "Tabisch/termix-dashlane-secrets",
+  "registry": "dashlane-secrets",
+  "name": "Dashlane",
   "apiVersion": 1,
   "publicKey": "iydYl7Sqc18dyHz5DMnzpG4b/0GnjoMivoidPOPJh6U=",
-  "updatedAt": "2026-10-18T12:27:27.111Z",
-  "plugins": []
+  "updatedAt": "2026-10-18T12:28:51.440Z",
+  "plugins": [
+    {
+      "id": "dashlane-secrets",
+      "name": "Dashlane",
+      "description": "Import and sync logins from Dashlane collections into Termix credentials.",
+      "author": "Tabisch",
+      "category": "Access & Security",
+      "repository": "https://github.com/Tabisch/termix-dashlane-secrets",
+      "icon": "KeyRound",
+      "features": [
+        "Connect a Dashlane account with a service device key",
+        "Pick which Dashlane collections to import",
+        "Logins become Termix password credentials, filed in a folder per collection",
+        "Keeps them in sync on a schedule, or when you press Sync now",
+        "Removes credentials whose login left the chosen collections, if you want"
+      ],
+      "docs": "https://github.com/Tabisch/termix-dashlane-secrets/tree/main/docs",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "api": "1",
+          "url": "https://github.com/Tabisch/termix-dashlane-secrets/releases/download/v1.0.0/dashlane-secrets-1.0.0.tmxplug",
+          "sha256": "97778a805204d44b8c106c7789d5687fa1fd5126e1932c2c9f6e1e3b43dcd884",
+          "signature": "c8EwFZDLxdNZcZFYJPaxtZgZfgoQTlxGgTWQWJRClyBR7Ll6GTJy1QjACUVNMsy4jTto0Ug4oMSxYcs8P6IeAA==",
+          "size": 358618,
+          "capabilities": [
+            "db:own",
+            "secrets:own",
+            "network:outbound",
+            "network:serve",
+            "ui:surface",
+            "users:impersonate"
+          ],
+          "releaseNotesUrl": "https://github.com/Tabisch/termix-dashlane-secrets/releases/tag/v1.0.0",
+          "notes": "### Added\n\n- Connect a Dashlane account with a service device key from `dcli devices register`\n- Pick which Dashlane collections to import\n- Logins in those collections become Termix password credentials, in a folder per collection and tagged `dashlane`\n- Sync on a schedule an admin sets, or with Sync now\n- Changed logins are updated, and logins that leave the collections can be deleted from Termix\n",
+          "publishedAt": "2026-10-18T12:28:38.000Z"
+        }
+      ]
+    }
+  ]
 }
