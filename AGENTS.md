@@ -54,6 +54,9 @@ aren't obvious from the code, and anything that has bitten you before.
   run where some transaction failed to decrypt.
 - `schedule.ts`: a one-minute tick that syncs connections older than the admin interval, each inside
   `ctx.asUser`. It never throws, so a broken account can't spend the error budget.
+- Every credential carries `dashlane` and `dashlane:<id>` (`credentialIdTag`, the normalized Dashlane id,
+  upper case, no braces). The id tag is a public contract: NetBox Sync assigns credentials to hosts by it, so
+  never change its format.
 - Collections are not documented by Dashlane: a collection's members are every GUID written anywhere in it
   except its own `Id` and `SpaceId`. Keep that tolerant.
 - `json()` columns are plain text: the repository `JSON.stringify`s on write.

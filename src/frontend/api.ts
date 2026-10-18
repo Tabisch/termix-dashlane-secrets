@@ -17,6 +17,8 @@ export interface ImportedCredential {
   title: string | null;
   collection: string;
   credentialId: number;
+  /** "dashlane:<id>", on the credential in Termix and stable across syncs. */
+  tag: string;
   updatedAt: string;
 }
 

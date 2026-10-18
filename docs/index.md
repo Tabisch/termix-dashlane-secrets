@@ -33,7 +33,9 @@ Every login in a chosen collection becomes a credential:
 | Password     | Password                                           |
 | Description  | Website                                            |
 | Folder       | The collection's name                              |
-| Tags         | `dashlane`                                         |
+| Tags         | `dashlane` and `dashlane:<id>`                     |
+
+`<id>` is the login's Dashlane id, like `dashlane:8A1B2C3D-0000-4000-8000-1234567890AB`. It never changes: not when the login is edited, not when its collection changes, and not when Termix makes the credential again. So other tools can find the credential by that tag. The tab lists the tag under each imported credential, ready to copy. The [NetBox Sync](https://github.com/Tabisch/termix-netbox-import) plugin uses it to give NetBox hosts a credential: tag a device in NetBox with `dashlane:<id>`.
 
 A login in several chosen collections goes in the folder of the first one you ticked. Logins without a password are skipped and counted under skipped.
 

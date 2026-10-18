@@ -294,7 +294,7 @@ describe("syncing", () => {
         name: "web-1",
         description: "https://web-1.example.com",
         folder: "Servers",
-        tags: ["dashlane"],
+        tags: ["dashlane", "dashlane:11111111-AAAA-4AAA-8AAA-111111111111"],
         username: "deploy",
         password: "pw-web",
         authType: "password",
@@ -303,15 +303,20 @@ describe("syncing", () => {
         name: "db-1",
         description: "",
         folder: "Servers",
-        tags: ["dashlane"],
+        tags: ["dashlane", "dashlane:22222222-BBBB-4BBB-8BBB-222222222222"],
         username: "dba@example.com",
         password: "pw-db",
         authType: "password",
       },
     ]);
-    expect(res.body.items.map((i: { title: string }) => i.title)).toEqual([
-      "db-1",
-      "web-1",
+    expect(
+      res.body.items.map((i: { title: string; tag: string }) => [
+        i.title,
+        i.tag,
+      ]),
+    ).toEqual([
+      ["db-1", "dashlane:22222222-BBBB-4BBB-8BBB-222222222222"],
+      ["web-1", "dashlane:11111111-AAAA-4AAA-8AAA-111111111111"],
     ]);
     expect(mock.auth.userTokens).toEqual([
       expect.objectContaining({ userId: "user-1", purpose: "Dashlane sync" }),
@@ -371,6 +376,12 @@ describe("syncing", () => {
     const res = await request("POST", "/sync");
     expect(res.body.lastSummary).toMatchObject({ created: 1, updated: 0 });
     expect(servers.credentialsOf("user-1")).toHaveLength(2);
+    const again = servers
+      .credentialsOf("user-1")
+      .find((c) => c.name === "web-1")!;
+    // A new Termix id, but the same tag, so whatever found it by tag still does.
+    expect(again.id).not.toBe(web.id);
+    expect(again.tags).toEqual(web.tags);
   });
 
   it("deletes credentials whose login left the chosen collections", async () => {
