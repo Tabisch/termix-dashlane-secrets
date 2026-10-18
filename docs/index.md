@@ -30,7 +30,7 @@ Every login in a chosen collection becomes a credential:
 | ------------ | -------------------------------------------------- |
 | Name         | The login's title, or else the website's host name |
 | Username     | Login, or else Email, or else Secondary login      |
-| Password     | Password                                           |
+| Password     | Password, or a reference to it (see below)         |
 | Description  | Website                                            |
 | Folder       | The collection's name                              |
 | Tags         | `dashlane` and `dashlane:<id>`                     |
@@ -38,6 +38,19 @@ Every login in a chosen collection becomes a credential:
 `<id>` is the login's Dashlane id, like `dashlane:8A1B2C3D-0000-4000-8000-1234567890AB`. It never changes: not when the login is edited, not when its collection changes, and not when Termix makes the credential again. So other tools can find the credential by that tag. The tab lists the tag under each imported credential, ready to copy. The [NetBox Sync](https://github.com/Tabisch/termix-netbox-import) plugin uses it to give NetBox hosts a credential: tag a device in NetBox with `dashlane:<id>`.
 
 A login in several chosen collections goes in the folder of the first one you ticked. Logins without a password are skipped and counted under skipped.
+
+## Keep passwords in Dashlane
+
+Turn on Keep passwords in Dashlane, under the collections, and press Save to keep the passwords out of Termix, the way the Secret Sources plugin does for 1Password. The next sync replaces each credential's password with a reference, like `dashlane://8A1B2C3D-0000-4000-8000-1234567890AB/password`. When a host using the credential connects, Termix asks this plugin for the password, and it reads it from your vault right then.
+
+- No password is written to Termix's database. Passwords are held in memory for about a minute after a connect, so connecting to several hosts at once asks Dashlane only once.
+- A changed password in Dashlane works on the next connect, without waiting for a sync.
+- Connecting needs Dashlane to be reachable and your device key to work. If it isn't, the connect fails and says why.
+- Only logins in the collections you import resolve. Untick a collection, or disconnect, and its references stop working.
+- A reference resolves with the vault of the credential's owner, also when the credential is shared.
+- Turn it off and the next sync writes the passwords back.
+
+You can also type a reference into a credential or host password yourself, as long as the login is in a collection you import.
 
 ## Keeping in sync
 
@@ -56,7 +69,7 @@ The tab shows when the last sync ran, what it changed, and why it failed if it d
 
 ## Disconnect
 
-Press Disconnect to delete the device key from Termix and keep the imported credentials, or Disconnect and delete imported credentials to remove those too.
+Press Disconnect to delete the device key from Termix and keep the imported credentials, or Disconnect and delete imported credentials to remove those too. With Keep passwords in Dashlane on, credentials you keep can't connect any more, since their references no longer resolve.
 
 ## What it can't import
 
@@ -73,3 +86,4 @@ Using the tab needs the Use Dashlane permission, which admins and users get by d
 - The vault could not be decrypted: the master password changed since the key was made. Register a new device and connect again.
 - Dashlane refused the device: it was removed in Dashlane. Register a new one.
 - Termix refused to create a credential (403): you don't have the credentials permissions. Ask an admin.
+- Connecting fails with "Dashlane login ... is not in a collection you import": the login left your chosen collections, or has no password any more. Tick its collection again, or pick another credential.

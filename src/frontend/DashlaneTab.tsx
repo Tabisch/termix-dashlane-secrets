@@ -95,6 +95,9 @@ function ConnectedView({
   const confirm = useConfirm();
   const [chosen, setChosen] = useState<string[]>(status.collections);
   const [removeMissing, setRemoveMissing] = useState(status.removeMissing);
+  const [passwordReferences, setPasswordReferences] = useState(
+    status.passwordReferences,
+  );
   const [busy, setBusy] = useState<
     null | "save" | "sync" | "refresh" | "disconnect"
   >(null);
@@ -102,10 +105,12 @@ function ConnectedView({
   useEffect(() => {
     setChosen(status.collections);
     setRemoveMissing(status.removeMissing);
-  }, [status.collections, status.removeMissing]);
+    setPasswordReferences(status.passwordReferences);
+  }, [status.collections, status.removeMissing, status.passwordReferences]);
 
   const dirty =
     removeMissing !== status.removeMissing ||
+    passwordReferences !== status.passwordReferences ||
     chosen.length !== status.collections.length ||
     chosen.some((name, index) => name !== status.collections[index]);
 
@@ -264,6 +269,12 @@ function ConnectedView({
             checked={removeMissing}
             onChange={setRemoveMissing}
           />
+          <SwitchRow
+            label={t("collections.passwordReferences")}
+            description={t("collections.passwordReferencesHint")}
+            checked={passwordReferences}
+            onChange={setPasswordReferences}
+          />
           <div>
             <Button
               size="sm"
@@ -271,7 +282,8 @@ function ConnectedView({
               onClick={() =>
                 run(
                   "save",
-                  () => api.saveConfig(chosen, removeMissing),
+                  () =>
+                    api.saveConfig(chosen, removeMissing, passwordReferences),
                   t("collections.saved"),
                 )
               }

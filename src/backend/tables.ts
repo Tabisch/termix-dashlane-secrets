@@ -24,6 +24,11 @@ export const connections = defineTable("connections", {
   availableCollections: json(),
   /** Delete credentials this plugin made when their item leaves the collections. */
   removeMissing: integer().notNull().default(1),
+  /**
+   * Write "dashlane://<id>/password" references into credentials instead of
+   * the passwords, resolved from the vault when a host connects.
+   */
+  passwordReferences: integer().notNull().default(0),
   lastSyncAt: timestamp(),
   /** "ok" or "error". */
   lastStatus: varchar(16),

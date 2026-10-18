@@ -3,6 +3,7 @@ import type { PluginContext } from "@termix-ssh/plugin-sdk/backend";
 import { DashlaneApiError } from "./dashlane/api.js";
 import { DeviceKeyFormatError, parseDeviceKey } from "./dashlane/device-key.js";
 import type { Repository } from "./repository.js";
+import type { SecretResolver } from "./resolver.js";
 import {
   credentialIdTag,
   DEVICE_KEY_SECRET,
@@ -40,6 +41,7 @@ export function registerRoutes(
   ctx: PluginContext,
   repo: Repository,
   syncer: Syncer,
+  resolver: Pick<SecretResolver, "forget">,
 ): void {
   router.use(ctx.rbac.require("use") as never);
 
@@ -60,6 +62,7 @@ export function registerRoutes(
       collections: connection.collections,
       availableCollections: connection.availableCollections,
       removeMissing: connection.removeMissing,
+      passwordReferences: connection.passwordReferences,
       lastSyncAt: connection.lastSyncAt,
       lastStatus: connection.lastStatus,
       lastError: connection.lastError,
@@ -131,6 +134,7 @@ export function registerRoutes(
       const userId = actor();
       const previous = await repo.getConnection(userId);
       await ctx.secrets.set(DEVICE_KEY_SECRET, raw.trim());
+      resolver.forget(userId);
       await repo.saveConnection(userId, {
         login: key.login,
         availableCollections,
@@ -167,6 +171,9 @@ export function registerRoutes(
    *               removeMissing:
    *                 type: boolean
    *                 description: Delete credentials this plugin made when their login leaves the chosen collections
+   *               passwordReferences:
+   *                 type: boolean
+   *                 description: Write dashlane://<id>/password references into credentials instead of passwords, resolved from Dashlane when a host connects. The next sync rewrites the credentials
    *     responses:
    *       200:
    *         description: Saved. The body is the new status
@@ -176,7 +183,7 @@ export function registerRoutes(
    *         description: Dashlane is not connected
    */
   router.put("/config", async (req: Request, res: Response) => {
-    const { collections, removeMissing } = req.body ?? {};
+    const { collections, removeMissing, passwordReferences } = req.body ?? {};
     if (
       !Array.isArray(collections) ||
       collections.length > MAX_COLLECTIONS ||
@@ -196,6 +203,14 @@ export function registerRoutes(
         .status(400)
         .json({ error: "removeMissing must be true or false" });
     }
+    if (
+      passwordReferences !== undefined &&
+      typeof passwordReferences !== "boolean"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "passwordReferences must be true or false" });
+    }
     const userId = actor();
     if (!(await repo.getConnection(userId))) {
       return res
@@ -208,7 +223,11 @@ export function registerRoutes(
     await repo.saveConnection(userId, {
       collections: unique,
       ...(removeMissing !== undefined ? { removeMissing } : {}),
+      ...(passwordReferences !== undefined ? { passwordReferences } : {}),
     });
+    // References resolve against the chosen collections, so drop what the
+    // resolver holds for the old ones.
+    resolver.forget(userId);
     res.json(await status(userId));
   });
 
@@ -304,6 +323,7 @@ export function registerRoutes(
     }
     await ctx.secrets.delete(DEVICE_KEY_SECRET);
     await repo.deleteConnection(userId);
+    resolver.forget(userId);
     ctx.log.info(`dashlane disconnected for user ${userId}`);
     res.json({ connected: false });
   });

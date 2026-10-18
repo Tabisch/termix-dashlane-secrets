@@ -31,6 +31,17 @@ export function credentialIdTag(dashlaneId: string): string {
   return `${CREDENTIAL_TAG}:${dashlaneId}`;
 }
 
+/** The scheme this plugin resolves in a credential's password at connect. */
+export const SECRET_SCHEME = "dashlane";
+
+/**
+ * What a credential holds instead of the password with password references
+ * on: Termix hands it to this plugin's resolver when a host connects.
+ */
+export function passwordReference(dashlaneId: string): string {
+  return `${SECRET_SCHEME}://${dashlaneId}/password`;
+}
+
 export class SyncError extends Error {
   constructor(
     message: string,
@@ -95,6 +106,7 @@ function hostnameOf(url: string): string {
 export function toCredentialInput(
   credential: VaultCredential,
   collection: string,
+  useReference = false,
 ): CredentialInput {
   const username =
     credential.login || credential.email || credential.secondaryLogin;
@@ -108,7 +120,9 @@ export function toCredentialInput(
     folder: collection,
     tags: [CREDENTIAL_TAG, credentialIdTag(credential.id)],
     username,
-    password: credential.password,
+    password: useReference
+      ? passwordReference(credential.id)
+      : credential.password,
   };
 }
 
@@ -188,7 +202,13 @@ export function createSyncer(deps: SyncDeps) {
         ([id, { credential, collection }]) =>
           credential.password &&
           imported.get(id)?.contentHash !==
-            hashInput(toCredentialInput(credential, collection)),
+            hashInput(
+              toCredentialInput(
+                credential,
+                collection,
+                connection.passwordReferences,
+              ),
+            ),
       );
     const core = needsCore ? await coreFor(userId) : null;
 
@@ -199,7 +219,11 @@ export function createSyncer(deps: SyncDeps) {
           summary.skipped += 1;
           continue;
         }
-        const input = toCredentialInput(credential, collection);
+        const input = toCredentialInput(
+          credential,
+          collection,
+          connection.passwordReferences,
+        );
         const contentHash = hashInput(input);
         const previous = imported.get(id);
         if (previous && previous.contentHash === contentHash) {
