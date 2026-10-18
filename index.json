@@ -4,7 +4,7 @@
   "name": "Dashlane",
   "apiVersion": 1,
   "publicKey": "iydYl7Sqc18dyHz5DMnzpG4b/0GnjoMivoidPOPJh6U=",
-  "updatedAt": "2026-10-18T14:54:43.709Z",
+  "updatedAt": "2026-10-18T14:56:09.000Z",
   "plugins": [
     {
       "id": "dashlane-secrets",
@@ -19,10 +19,31 @@
         "Pick which Dashlane collections to import",
         "Logins become Termix password credentials, filed in a folder per collection",
         "Keeps them in sync on a schedule, or when you press Sync now",
-        "Removes credentials whose login left the chosen collections, if you want"
+        "Removes credentials whose login left the chosen collections, if you want",
+        "Or keeps passwords in Dashlane: credentials hold a dashlane:// reference, resolved when a host connects"
       ],
       "docs": "https://github.com/Tabisch/termix-dashlane-secrets/tree/main/docs",
       "versions": [
+        {
+          "version": "1.2.1",
+          "api": "1",
+          "url": "https://github.com/Tabisch/termix-dashlane-secrets/releases/download/v1.2.1/dashlane-secrets-1.2.1.tmxplug",
+          "sha256": "d5bc294dbf03f00614d60a7ba9f5d7fb811788b45a0344084119bf1c2d7b42d8",
+          "signature": "GDJXKGxMT156GEgjlaP30mpMtXIs8v+Y39XLoDgIIiyf8MnmGTnAQ9p+qfGYjIi9CZ8dEvHJBZWyo76MHDfjAQ==",
+          "size": 362442,
+          "capabilities": [
+            "db:own",
+            "secrets:own",
+            "network:outbound",
+            "auth:provide",
+            "network:serve",
+            "ui:surface",
+            "users:impersonate"
+          ],
+          "releaseNotesUrl": "https://github.com/Tabisch/termix-dashlane-secrets/releases/tag/v1.2.1",
+          "notes": "### Fixed\n\n- The plugin stopped on start with \"cannot register secret scheme \"dashlane\": it is not listed in contributes.auth.secretSchemes\". The manifest now declares the `dashlane` scheme\n",
+          "publishedAt": "2026-10-18T14:55:55.000Z"
+        },
         {
           "version": "1.1.0",
           "api": "1",
