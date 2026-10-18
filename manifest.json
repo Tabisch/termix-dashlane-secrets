@@ -1,0 +1,74 @@
+{
+  "id": "dashlane-secrets",
+  "name": "Dashlane",
+  "version": "1.0.0",
+  "description": "Import and sync logins from Dashlane collections into Termix credentials.",
+  "author": {
+    "name": "Tabisch",
+    "url": "https://github.com/Tabisch"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/Tabisch/termix-dashlane-secrets",
+  "docs": "https://github.com/Tabisch/termix-dashlane-secrets/tree/main/docs",
+  "category": "Access & Security",
+  "icon": "KeyRound",
+  "features": [
+    "Connect a Dashlane account with a service device key",
+    "Pick which Dashlane collections to import",
+    "Logins become Termix password credentials, filed in a folder per collection",
+    "Keeps them in sync on a schedule, or when you press Sync now",
+    "Removes credentials whose login left the chosen collections, if you want"
+  ],
+  "env": [
+    {
+      "name": "EMBEDDED_BACKEND_PORT",
+      "description": "Termix's own internal API port. The plugin calls the credentials API there. Only set when Termix itself is set to a different port.",
+      "default": "30001"
+    }
+  ],
+  "engine": {
+    "termix": ">=26.10.0",
+    "api": "^1.3"
+  },
+  "capabilities": [
+    "db:own",
+    "secrets:own",
+    "network:outbound",
+    "network:serve",
+    "ui:surface",
+    "users:impersonate"
+  ],
+  "contributes": {
+    "tabs": [
+      {
+        "id": "dashlane",
+        "titleKey": "tab.title",
+        "icon": "KeyRound",
+        "openFrom": ["rail"]
+      }
+    ],
+    "permissions": [
+      {
+        "name": "use",
+        "titleKey": "permissions.use.title",
+        "descriptionKey": "permissions.use.description",
+        "defaultRoles": ["admin", "user"]
+      }
+    ],
+    "settings": {
+      "admin": [
+        {
+          "key": "syncIntervalMinutes",
+          "type": "number",
+          "labelKey": "settings.admin.syncIntervalMinutes.label",
+          "descriptionKey": "settings.admin.syncIntervalMinutes.description",
+          "default": 60,
+          "min": 0,
+          "max": 10080
+        }
+      ]
+    }
+  },
+  "locales": "locales",
+  "platforms": ["linux", "win32", "darwin"]
+}

@@ -1,0 +1,78 @@
+{
+  "plugin": {
+    "name": "Dashlane",
+    "description": "Import and sync logins from Dashlane collections into Termix credentials."
+  },
+  "tab": {
+    "title": "Dashlane"
+  },
+  "connect": {
+    "title": "Connect Dashlane",
+    "intro": "Termix reads your vault with a service device key. Make one on any computer with the Dashlane CLI, then paste it here.",
+    "command": "dcli devices register \"Termix\"",
+    "keyLabel": "Service device key",
+    "keyPlaceholder": "dls_...",
+    "keyHint": "The key includes your master password. It is stored encrypted on the server and never shown again. Remove the device in Dashlane to revoke it.",
+    "submit": "Connect",
+    "connecting": "Connecting..."
+  },
+  "account": {
+    "title": "Account",
+    "login": "Signed in as",
+    "disconnect": "Disconnect",
+    "disconnectTitle": "Disconnect Dashlane?",
+    "disconnectBody": "The device key is deleted from Termix. Credentials that were imported stay unless you remove them too.",
+    "disconnectKeep": "Disconnect",
+    "disconnectRemove": "Disconnect and delete imported credentials",
+    "disconnected": "Dashlane disconnected"
+  },
+  "collections": {
+    "title": "Collections to import",
+    "hint": "Logins in these collections become Termix credentials, in a folder named after the collection.",
+    "empty": "No collections in this vault. Make one in Dashlane, then press Refresh.",
+    "refresh": "Refresh",
+    "items_one": "{{count}} login",
+    "items_other": "{{count}} logins",
+    "missing": "Not in the vault any more",
+    "removeMissing": "Delete credentials that leave these collections",
+    "removeMissingHint": "Only credentials this plugin imported are ever deleted.",
+    "save": "Save",
+    "saved": "Collections saved"
+  },
+  "sync": {
+    "title": "Sync",
+    "now": "Sync now",
+    "running": "Syncing...",
+    "never": "Not synced yet",
+    "last": "Last sync",
+    "interval_one": "Syncs every minute.",
+    "interval_other": "Syncs every {{count}} minutes.",
+    "manualOnly": "Automatic sync is off. An admin can turn it on in Settings.",
+    "ok": "Synced",
+    "failed": "The last sync failed",
+    "summary": "{{created}} added, {{updated}} updated, {{unchanged}} unchanged, {{removed}} removed, {{skipped}} skipped",
+    "skippedHint": "Logins without a password are skipped."
+  },
+  "imported": {
+    "title": "Imported credentials",
+    "empty": "Nothing imported yet. Pick collections and press Sync now."
+  },
+  "error": {
+    "load": "Could not load the Dashlane connection",
+    "generic": "Something went wrong"
+  },
+  "permissions": {
+    "use": {
+      "title": "Use Dashlane",
+      "description": "Connect a Dashlane account and import its logins as credentials."
+    }
+  },
+  "settings": {
+    "admin": {
+      "syncIntervalMinutes": {
+        "label": "Sync interval (minutes)",
+        "description": "How often every connected account is synced. 0 turns automatic sync off, so people sync by hand."
+      }
+    }
+  }
+}

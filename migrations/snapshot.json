@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "tables": {
+    "connections": {
+      "columns": {
+        "id": {
+          "type": "id",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "type": "refUser",
+          "length": 255,
+          "notNull": true,
+          "unique": true
+        },
+        "login": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "collections": {
+          "type": "json",
+          "notNull": true
+        },
+        "availableCollections": {
+          "type": "json"
+        },
+        "removeMissing": {
+          "type": "integer",
+          "notNull": true,
+          "defaultValue": 1
+        },
+        "lastSyncAt": {
+          "type": "timestamp"
+        },
+        "lastStatus": {
+          "type": "varchar",
+          "length": 16
+        },
+        "lastError": {
+          "type": "text"
+        },
+        "lastSummary": {
+          "type": "json"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "notNull": true,
+          "defaultNow": true
+        }
+      },
+      "indexes": []
+    },
+    "items": {
+      "columns": {
+        "id": {
+          "type": "id",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "type": "refUser",
+          "length": 255,
+          "notNull": true
+        },
+        "dashlaneId": {
+          "type": "varchar",
+          "length": 64,
+          "notNull": true
+        },
+        "credentialId": {
+          "type": "integer",
+          "notNull": true
+        },
+        "collection": {
+          "type": "varchar",
+          "length": 255,
+          "notNull": true
+        },
+        "title": {
+          "type": "text"
+        },
+        "contentHash": {
+          "type": "varchar",
+          "length": 64,
+          "notNull": true
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "notNull": true,
+          "defaultNow": true
+        }
+      },
+      "indexes": [
+        {
+          "name": "uq_p_dashlane_secrets_items_user_item",
+          "columns": [
+            "userId",
+            "dashlaneId"
+          ],
+          "unique": true
+        },
+        {
+          "name": "idx_p_dashlane_secrets_items_user_id",
+          "columns": [
+            "userId"
+          ]
+        }
+      ]
+    }
+  }
+}

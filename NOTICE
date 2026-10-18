@@ -1,0 +1,9 @@
+Termix Dashlane plugin
+Copyright 2026 Tabisch
+
+src/backend/dashlane/crypto.ts follows the payload format and decryption code
+of the Dashlane CLI (https://github.com/Dashlane/dashlane-cli),
+Copyright Dashlane, Inc., licensed under the Apache License, Version 2.0.
+
+src/backend/dashlane/api.ts uses the Dashlane CLI's public application keys,
+which service device keys made by `dcli devices register` belong to.
