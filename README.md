@@ -5,6 +5,8 @@ A [Termix](https://github.com/Termix-SSH/Termix) plugin that imports the logins 
 - Connect with a Dashlane service device key (`dcli devices register`), so it works with no one signed in
 - Pick which collections to import
 - Each login becomes a password credential, filed in a folder named after its collection and tagged `dashlane`
+- Each credential also gets a `dashlane:<Dashlane id>` tag that never changes, not on edits, moves or a reimport. The tab shows it under each credential
+- With [NetBox Sync](https://github.com/Tabisch/termix-netbox-import), tag a device in NetBox with that same `dashlane:<id>` and its host connects with that login
 - Syncs on a schedule an admin sets, or when you press Sync now
 - Updates changed logins, and can delete credentials whose login left the collections
 
