@@ -4,7 +4,7 @@
   "name": "Dashlane",
   "apiVersion": 1,
   "publicKey": "iydYl7Sqc18dyHz5DMnzpG4b/0GnjoMivoidPOPJh6U=",
-  "updatedAt": "2026-10-18T12:28:51.440Z",
+  "updatedAt": "2026-10-18T13:09:03.867Z",
   "plugins": [
     {
       "id": "dashlane-secrets",
@@ -23,6 +23,25 @@
       ],
       "docs": "https://github.com/Tabisch/termix-dashlane-secrets/tree/main/docs",
       "versions": [
+        {
+          "version": "1.1.0",
+          "api": "1",
+          "url": "https://github.com/Tabisch/termix-dashlane-secrets/releases/download/v1.1.0/dashlane-secrets-1.1.0.tmxplug",
+          "sha256": "c4debd5f47c4825f918504a5be56188b62e7f3d6b1100f64651bd751ed357987",
+          "signature": "JoKLIzEoqp1bQFJcRoF/qzN7fKQ8YAp8ThnrrLjZf+wiRKSYSk1BJkqxF6nLcG+ClaV2g46ce8bSUnBEJQubAw==",
+          "size": 359203,
+          "capabilities": [
+            "db:own",
+            "secrets:own",
+            "network:outbound",
+            "network:serve",
+            "ui:surface",
+            "users:impersonate"
+          ],
+          "releaseNotesUrl": "https://github.com/Tabisch/termix-dashlane-secrets/releases/tag/v1.1.0",
+          "notes": "### Added\n\n- Every imported credential is tagged `dashlane:<id>` with its Dashlane id, which stays the same across syncs and when a credential is made again. The tab shows it under each credential. Credentials imported before get the tag on the next sync\n",
+          "publishedAt": "2026-10-18T13:08:49.000Z"
+        },
         {
           "version": "1.0.0",
           "api": "1",
