@@ -10,6 +10,32 @@ A [Termix](https://github.com/Termix-SSH/Termix) plugin that imports the logins 
 
 How to set it up and use it: [docs/index.md](docs/index.md).
 
+## Install from GitHub
+
+This repo is its own Termix plugin registry. Add it once and Termix installs the plugin straight from the GitHub releases and offers every new version under Updates.
+
+1. In Termix, open Plugins, Registries and press Add registry.
+2. Paste this URL and press Check:
+
+   ```
+   https://raw.githubusercontent.com/Tabisch/termix-dashlane-secrets/registry/index.json
+   ```
+
+3. Check that the key id Termix shows matches the one in the latest [Registry workflow run](https://github.com/Tabisch/termix-dashlane-secrets/actions/workflows/registry.yml) summary, then press Trust and add.
+4. Open Browse, find Dashlane and press Install. Approve the capabilities it asks for.
+
+You can also download `dashlane-secrets-<version>.tmxplug` from [Releases](https://github.com/Tabisch/termix-dashlane-secrets/releases) and install it from Plugins, Install from file, with Plugin developer mode on under Settings, General. A plugin installed that way doesn't update on its own.
+
+### Releasing (maintainers)
+
+Releases are signed with the `TERMIX_PLUGIN_SIGNING_KEY` repository secret. Anyone with this key can publish plugins your registry's users will trust. If you change it later, everyone has to remove and add the registry again.
+
+1. Bump the version in `manifest.json`, `package.json` and a new `CHANGELOG.md` section.
+2. Make a `dev-X.Y.Z` branch from `main`, then run the Release workflow from it in Actions. It signs the `.tmxplug`, publishes the GitHub release and merges into `main`. Pick `beta` to publish `X.Y.Z-beta.N` instead, or `dry-run` to check without publishing.
+3. The Registry workflow runs after it and writes `index.json` to the `registry` branch. Its run summary shows the registry URL and the key id. Run it by hand from Actions at any time to rebuild the index.
+
+The Registry workflow signs any release that has no `.sig` yet and attaches the `.sig` to it, so every release gets listed. The index's public key is derived from the secret, so there is nothing else to keep in sync.
+
 ## How it works
 
 1. The service device key holds your Dashlane login, a device key pair and your master password. It is stored with `ctx.secrets`, encrypted with the Termix installation key, so scheduled syncs can read it.

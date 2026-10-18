@@ -13,7 +13,8 @@
     "sign": "termix-plugin sign",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "registry": "node scripts/build-registry.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
